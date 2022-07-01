@@ -95,15 +95,14 @@ def load_orchestrator_from_file(output_name):
     return orchestrator
 
 
-def create_decoder(encoder_description, for_model_output):
+def create_decoder(encoder_description, start_input_column_id=None):
     """
     Creates a decoder from an encoder description
 
     :param encoder_description: Description of the encoder
     :type encoder_description: list
-    :param for_model_output: Defines if the decoder must decode output from the neural network (hence modify its
-    "columns" to consider)
-    :type for_model_output: bool
+    :param start_input_column_id: First columns id of the encoded data (only used for neural network output)
+    :type start_input_column_id: int
     :return: Decoder
     :rtype: Encoder
     """
@@ -112,32 +111,27 @@ def create_decoder(encoder_description, for_model_output):
     output_column_names = encoder_description[2]
     output_column_ids = encoder_description[3]
     input_column_names = encoder_description[4]
-    input_column_ids = encoder_description[5]
-    if for_model_output:
-        decoder = decoder_class([""] * len(input_column_ids), [0, len(input_column_ids)], output_column_names,
-                                output_column_ids,
-                                properties)
+    if start_input_column_id is None:
+        input_column_ids = encoder_description[5]
     else:
-        decoder = decoder_class(input_column_names, input_column_ids, output_column_names, output_column_ids,
+        input_column_ids = [start_input_column_id, start_input_column_id + len(input_column_names) - 1]
+    decoder = decoder_class(input_column_names, input_column_ids, output_column_names, output_column_ids,
                                 properties)
     return decoder
 
 
-def create_all_decoders(orchestrator, for_model_output):
+def create_all_decoders(orchestrator):
     """
     Creates all the decoders according to the description of all the encoders
 
     :param orchestrator: Orchestrator that has the description of all the encoders
     :type orchestrator: Orchestrator
-    :param for_model_output: Defines if the decoder must decode output from the neural network (hence modify its
-    "columns" to consider)
-    :type for_model_output: bool
     :return: All the associated decoders inside a encoder manager
     :rtype: EncoderManager
     """
     decoders = []
     for encoder_description in orchestrator.encoder_descriptions:
-        decoders.append(create_decoder(encoder_description, for_model_output))
+        decoders.append(create_decoder(encoder_description))
     decoder_manager = EncoderManager(decoders)
     return decoder_manager
 
@@ -188,7 +182,7 @@ def decode_offline(output_name, output_chunk_size):
     decoded_filename = "Output/" + output_name + "/Decoded/decoded_" + file_type
 
     orchestrator = load_orchestrator_from_file(output_name)
-    decoder_manager = create_all_decoders(orchestrator, False)
+    decoder_manager = create_all_decoders(orchestrator)
     if orchestrator.has_leftovers:
         with open(leftover_filename + ".csv") as leftover_file:
             reader = csv.reader(leftover_file)

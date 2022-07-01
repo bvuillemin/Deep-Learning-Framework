@@ -114,4 +114,4 @@ class OneHotDecoder(MultiColumnEncoder):
         return result
 
     def encode_single_result(self, input, output, leftover):
-        return self.unique_values[np.argmax(output)]
+        return self.unique_values[np.argmax(output[self.column_ids[0]:self.column_ids[1] + 1])]

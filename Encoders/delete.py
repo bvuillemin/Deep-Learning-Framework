@@ -74,3 +74,6 @@ class DeleteDecoder(SingleColumnEncoder):
         result = np.full((len(case), 1), self.data[self.data_counter], dtype=object)
         self.data_counter += 1
         return result
+
+    def encode_single_result(self, input, output, leftover):
+        return leftover

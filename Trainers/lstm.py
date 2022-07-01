@@ -24,21 +24,22 @@ from Trainers import Trainer
 class LSTMTrainer(Trainer):
     def build(self, preparator, epoch_counter):
         super().build(preparator, epoch_counter)
-        activity_decoder = create_decoder(preparator.orchestrator.encoder_descriptions[1], True)
+        activity_decoder = create_decoder(preparator.orchestrator.encoder_descriptions[1], 0)
         self.decoders.append(activity_decoder)
-        ts_decoder = create_decoder(preparator.orchestrator.encoder_descriptions[2], True)
+        ts_decoder = create_decoder(preparator.orchestrator.encoder_descriptions[2], 0)
         self.decoders.append(ts_decoder)
 
     def get_prediction(self, input, leftovers):
         output = self.model.predict(input)
         result = []
-        for i in range(len(self.decoders)):
-            decoder = self.decoders[i]
-            if decoder.leftover_name:
-                leftover = leftovers[decoder.leftover_name]
-            else:
-                leftover = None
-            result.append(decoder.encode_single_result(input, output[i], leftover))
+        for j in range(len(output)):
+            for i in range(len(self.decoders)):
+                decoder = self.decoders[i]
+                if decoder.leftover_name:
+                    leftover = leftovers[decoder.leftover_name].iloc[0]
+                else:
+                    leftover = None
+                result.append(decoder.encode_single_result(input, output[i][j], leftover))
         return result
 
     def core(self):

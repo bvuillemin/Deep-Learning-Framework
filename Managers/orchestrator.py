@@ -240,9 +240,11 @@ class Orchestrator:
             if first_chunk:
                 first_chunk = False
         for encoder in self.encoder_manager.encoders:
+            if encoder.column_id == activity_column:
+                activity_encoder = encoder
             encoder.finalize()
         self.encoder_manager.set_all_output_column_names()
-        activity_counter = len(self.encoder_manager.encoders[activity_column].output_column_names)
+        activity_counter = len(activity_encoder.output_column_names)
         self.insert_infos(input_path, output_name, column_names, dates_ids, case_counter, total_chunk_counter,
                           double_timestamps, activity_counter, max_case_length)
 
