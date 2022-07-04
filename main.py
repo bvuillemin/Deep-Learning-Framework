@@ -27,7 +27,7 @@ if __name__ == '__main__':
         orchestrator = build_orchestrator(input_path, output_name, input_chunk_size, encoder_manager,
                                           editor_manager, dates_ids, double_timestamps)
         orchestrator.save_to_file()
-    preparator.build(input_chunk_size, output_chunk_size, orchestrator)
+    preparator.build(input_chunk_size, output_chunk_size, batch_size, orchestrator)
 
     # ONLINE
     if mode == "online":

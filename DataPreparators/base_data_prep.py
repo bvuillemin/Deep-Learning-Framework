@@ -15,9 +15,10 @@ class DataPreparator:
         """
         self.input_chunk_size = None
         self.output_chunk_size = None
+        self.batch_size = None
         self.orchestrator = None
 
-    def build(self, input_chunk_size, output_chunk_size, orchestrator):
+    def build(self, input_chunk_size, output_chunk_size, batch_size, orchestrator):
         """
         Assigns the necessary information to the preparator
 
@@ -25,14 +26,17 @@ class DataPreparator:
         :type input_chunk_size: int
         :param output_chunk_size: Number of cases per chunk
         :type output_chunk_size: int
+        :param batch_size: Size of a batch to train the neural network
+        :type batch_size: int
         :param orchestrator: Orchestrator
         :type orchestrator: Orchestrator
         """
         self.input_chunk_size = input_chunk_size
         self.output_chunk_size = output_chunk_size
+        self.batch_size = batch_size
         self.orchestrator = orchestrator
 
-    def run_online(self, epoch_counter, get_leftovers=False):
+    def run_online(self, get_leftovers=False):
         """
         Separates the encoded data into inputs and outputs (online mode)
 

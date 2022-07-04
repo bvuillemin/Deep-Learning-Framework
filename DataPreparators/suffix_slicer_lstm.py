@@ -15,18 +15,18 @@ from generic_functions import get_total_chunk_number
 
 class SlicerLSTM(DataPreparator):
 
-    def run_online(self, epoch_counter, get_leftovers=False):
+    def run_online(self, get_leftovers=False):
         """
         Slices cases into suffixes and prefixes (online mode)
 
         """
-        for epoch in range(epoch_counter):
+        while True:
             prefixes = []
             suffixes = []
             if get_leftovers:
                 all_leftovers = []
                 leftovers_names = self.orchestrator.encoder_manager.get_leftover_names()
-            for case, leftover in self.orchestrator.process_online(self.input_chunk_size, self.output_chunk_size):
+            for case, leftover in self.orchestrator.process_online(self.input_chunk_size):
                 i = 1
                 while i < len(case):
                     prefixes.append(self.pad(case[:i]))
@@ -34,7 +34,7 @@ class SlicerLSTM(DataPreparator):
                     if get_leftovers:
                         all_leftovers.append(leftover)
                     i += 1
-                    if len(prefixes) == self.output_chunk_size:
+                    if len(prefixes) == self.batch_size:
                         prefixes = np.asarray(prefixes).astype(float)
                         suffixes = np.asarray(suffixes).astype(float)
                         if get_leftovers:
@@ -57,7 +57,7 @@ class SlicerLSTM(DataPreparator):
 
     def get_epoch_size_online(self):
         total = 0
-        for cases, leftovers in self.orchestrator.process_online(self.input_chunk_size, self.output_chunk_size):
+        for cases in self.orchestrator.edit_online(self.input_chunk_size, self.output_chunk_size):
             for case in cases:
                 total += len(case) - 1
         print(total, "cases")
@@ -108,30 +108,32 @@ class SlicerLSTM(DataPreparator):
                             prefixes = []
                             suffixes = []
 
-    def read_offline(self, num_epochs):
+    def read_offline(self):
         """
         Slices cases into suffixes and prefixes (online mode)
 
         """
-        for i in range(num_epochs):
-            with open("Output/" + self.orchestrator.output_name + "/prefixes.npy", 'rb') as input_file1:
-                with open("Output/" + self.orchestrator.output_name + "/suffixes.npy", 'rb') as input_file2:
+        with open("Output/" + self.orchestrator.output_name + "/prefixes.npy", 'rb') as input_file1:
+            with open("Output/" + self.orchestrator.output_name + "/suffixes.npy", 'rb') as input_file2:
+                while True:
                     for chunk_index in range(
-                            get_total_chunk_number(self.orchestrator.case_counter, self.output_chunk_size)):
+                            get_total_chunk_number(self.orchestrator.case_counter, self.batch_size)):
                         prefixes = []
                         suffixes = []
                         if chunk_index == get_total_chunk_number(self.orchestrator.case_counter,
-                                                                 self.output_chunk_size) - 1:
-                            chunk_range = self.orchestrator.case_counter % self.output_chunk_size
+                                                                 self.batch_size) - 1:
+                            chunk_range = self.orchestrator.case_counter % self.batch_size
                         # Else, the number of cases if equal of the size of a chunk
                         else:
-                            chunk_range = self.output_chunk_size
+                            chunk_range = self.batch_size
                         for _ in range(chunk_range):
                             prefixes.append(np.load(input_file1, allow_pickle=True))
                             suffixes.append(np.load(input_file2, allow_pickle=True))
                         prefixes = np.asarray(prefixes)
                         suffixes = np.asarray(suffixes)
                         yield prefixes, suffixes
+                    input_file1.seek(0)
+                    input_file2.seek(0)
 
     def get_epoch_size_offline(self):
         total = 0

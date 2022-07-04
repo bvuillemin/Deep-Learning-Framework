@@ -76,16 +76,16 @@ class LSTMTrainer(Trainer):
     def train_model_online(self):
         model, callbacks = self.core()
         epoch_size = self.preparator.get_epoch_size_online()
-        model.fit(self.preparator.run_online(self.epoch_counter), verbose=1, callbacks=callbacks,
-                  steps_per_epoch=ceil(epoch_size / self.preparator.output_chunk_size), epochs=self.epoch_counter)
+        model.fit(self.preparator.run_online(), verbose=1, callbacks=callbacks,
+                  steps_per_epoch=ceil(epoch_size / self.preparator.batch_size), epochs=self.epoch_counter)
         self.model = model
         return model
 
     def train_model_offline(self):
         epoch_size = self.preparator.get_epoch_size_offline()
         model, callbacks = self.core()
-        model.fit(self.preparator.read_offline(epoch_size), verbose=1,
-                  callbacks=callbacks, steps_per_epoch=ceil(epoch_size / self.preparator.output_chunk_size),
+        model.fit(self.preparator.read_offline(), verbose=1,
+                  callbacks=callbacks, steps_per_epoch=ceil(epoch_size / self.preparator.batch_size),
                   epochs=self.epoch_counter)
         self.model = model
         return model

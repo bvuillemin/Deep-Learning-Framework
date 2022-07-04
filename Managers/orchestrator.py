@@ -293,7 +293,7 @@ class Orchestrator:
                 first_chunk = False
         yield all_cases
 
-    def process_online(self, input_chunk_size, output_chunk_size):
+    def process_online(self, input_chunk_size):
         """
         Converts the raw data into interpretable data for the neural network.
 
@@ -306,8 +306,6 @@ class Orchestrator:
 
         :param input_chunk_size: Number of lines by chunk, used if the database is too big
         :type input_chunk_size: int
-        :param output_chunk_size: Number of cases by chunk, used if the database is too big
-        :type output_chunk_size: int
         """
         # Get the list of chunks
         chunks = pd.read_csv(self.input_path, chunksize=input_chunk_size, parse_dates=self.dates_ids)
@@ -317,8 +315,6 @@ class Orchestrator:
         previous_case_id = ""
         first_chunk = True
         chunk_counter = 0
-        all_cases = []
-        all_leftovers = []
         case_counter = 0
         # Process the chunk and record them
         for og_chunk in chunks:
@@ -333,7 +329,6 @@ class Orchestrator:
                 yield modified_case, leftover
             if first_chunk:
                 first_chunk = False
-        yield all_cases, all_leftovers
 
     def process_offline(self, input_chunk_size, edit_db=False, cov_path=None, debug=False):
         """

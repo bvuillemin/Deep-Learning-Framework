@@ -18,8 +18,10 @@ input_path = "Data/helpdesk.csv"
 output_name = "helpdesk"
 # Size of a chunk when reading the input file, i.e. number of lines to store to memory
 input_chunk_size = 50000
-# Size of a chunk for pre-processed data, i.e. number of data that will go to the neural network to store to memory
+# Size of a chunk for pre-processed data, i.e. number of pre-processed data to store to memory
 output_chunk_size = 500
+# Size of a data batch for training the neural network
+batch_size = 32
 # Number of epoch for the neural network
 epoch_counter = 5
 # States if the input file has two timestamps, i.e. a start and end timestamp
